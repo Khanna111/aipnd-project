@@ -71,3 +71,56 @@ def get_loader(name='train', data_dir='flowers'):
         return testloader, class_to_idx
     else:
         return validationloader, class_to_idx
+    
+    
+    
+    
+
+def process_image(image_path):
+    ''' Scales, crops, and normalizes a PIL image for a PyTorch model,
+        returns an Numpy array (I have changed it to return a regular torch float tensor)
+    '''
+    
+    # TODO: Process a PIL image for use in a PyTorch model
+    
+    pil_image = Image.open(image_path)
+
+
+    loader = transforms.Compose([
+        transforms.Resize(256),
+        transforms.CenterCrop(224),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],std=[0.229, 0.224, 0.225])
+    ])
+
+    # This image is already transformed in the way pytorch expects:
+    # The channels: [0,255]
+    # The shape: 3,224,224
+    # We could have followed the steps specified above 
+    # but this is easier and consistent with what we have been doing. 
+    # Of course, the result of following the above steps would
+    #  be different (a little) from what we achieve here.
+    tensor_image = loader(pil_image).float()
+    print(type(tensor_image))
+    return tensor_image
+
+
+
+def image_class_and_category(image_path, cat_to_name):
+    '''
+    Returns the folder name and the actual flower name 
+    '''
+    
+    # Put cat_to_name in the mix. 
+    # cat_to_name => folder : name of flower
+    # get the image folder name
+    import re
+    regex = r"/(\d+)/"
+    matches = re.findall(regex, image_path)
+    print (matches[0])
+    folder_from_image_path = matches[0]
+    cat_name = cat_to_name[folder_from_image_path]
+    print(cat_name)
+    return folder_from_image_path, cat_name
+
+

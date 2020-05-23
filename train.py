@@ -1,7 +1,17 @@
+# ------------------------------------------------------------------------------------------------------------------------
+# SAMPLE COMMAND LINE ARGUMENTS
+# python train.py  --arch="vgg19" --epoch=3 --save_dir="./checkpoints"  './flowers'
+# python train.py  --arch="densenet121" --epoch=3 --save_dir="./checkpoints"  './flowers'
+# ------------------------------------------------------------------------------------------------------------------------
+
+
+
 # Imports here
 
 import plumbing as lp
 import nn_utility as lnn
+
+import os
 
 import time
 from collections import OrderedDict
@@ -23,7 +33,8 @@ arch = {"vgg19":25088,
         "densenet121":1024}
 
 parser = argparse.ArgumentParser(
-    description = 'PARSER: train.py'
+    description = 'PARSER: train.py',
+    epilog =  "FOR EG (TO USE VGG19): python train.py  --arch='vgg19' --epoch=3 --save_dir='./checkpoints'  './flowers'" 
 )
 
 # data_dir="./flowers"
@@ -31,11 +42,11 @@ parser = argparse.ArgumentParser(
 parser.add_argument('data_dir',
                     action="store", default="./flowers")
 parser.add_argument('--save_dir',
-                    action="store", default="./checkpoint_cl.pth")
+                    action="store", default="./checkpoints")
 parser.add_argument('--arch',
                     action="store", default="vgg19", choices=["vgg19", "densenet121"])
 parser.add_argument('--hidden_units',
-                    action="store", dest="hidden_units", type=int, default=4096)
+                    action="store", dest="hidden_units", type=int)
 parser.add_argument('--learning_rate',
                     action="store", type=float,default=0.001)
 parser.add_argument('--epochs',
@@ -58,13 +69,6 @@ epochs              = args.epochs
 dropout             = args.dropout
 gpu                 = args.gpu
 
-print("\nDEBUG....")
-for arg in vars(args):
-    print (arg, getattr(args, arg))
-print("checkpoint: ",checkpoint_path+"_"+arch)
-print("---------------------------\n")
-
-
 
 if gpu == 'gpu':
     device = 'cuda'
@@ -74,9 +78,30 @@ else:
 if arch=="vgg19":
     input= 25088
     output=102
+    if hidden_units == None:
+        hidden_units = 4096
 elif arch=="densenet121":
     input=1024
     output=102
+    if hidden_units == None:
+        hidden_units = 500
+
+
+
+        
+print("\nDEBUG....")
+for arg in vars(args):
+    print (arg, getattr(args, arg))
+checkpoint_file = checkpoint_path+"/checkpoint_cl."+arch+".pth"
+print("checkpoint: ", checkpoint_file)
+print("Hiden Units: ", hidden_units)
+print("---------------------------\n")
+
+print(f"Creating SAVE_DIR: '{checkpoint_path}' if does not exist")
+if not os.path.exists(checkpoint_path):
+    os.makedirs(checkpoint_path)
+
+
 
 
 
@@ -113,6 +138,7 @@ def train_model(model, criterion, optimizer, num_epochs=5, print_every_step=5, d
             running_loss += loss.item()
 
             if steps % print_every == 0:
+#                 break
                 test_loss = 0
                 accuracy = 0
                 model.eval()
@@ -142,17 +168,7 @@ def train_model(model, criterion, optimizer, num_epochs=5, print_every_step=5, d
 
     return model
     
-    # #fmodel.save_checkpoint(traindata,model,path,struct,hidden_units,dropout,lr)
-    # model.class_to_idx =  train_data.class_to_idx
-    # torch.save({'structure' :struct,
-    #             'hidden_units':hidden_units,
-    #             'dropout':dropout,
-    #             'learning_rate':lr,
-    #             'no_of_epochs':epochs,
-    #             'state_dict':model.state_dict(),
-    #             'class_to_idx':model.class_to_idx},
-    #             path)
-    # print("Saved checkpoint!")
+    
 if __name__== "__main__":
 
     model, criterion, optimizer = lnn.get_model(arch,"cuda",input,hidden_units,output,dropout,learning_rate)
@@ -162,13 +178,14 @@ if __name__== "__main__":
     with active_session():
         model_trained = train_model(model,criterion,optimizer,epochs,5,device )
 
-    arch = 'vgg19'
-
-    print("1")
     print(f"Epochs: {epochs}.. arch: {arch}.. ")
 
     tloader, class_to_idx = lp.get_loader("train", data_dir)
 
+    # Create checkpoint save_dir if not exists:
+    
+   
+        
     # TODO: Save the checkpoint
     checkpoint = {
         'arch': arch,
@@ -181,5 +198,6 @@ if __name__== "__main__":
         'optim_state_dict': optimizer.state_dict(),
         'state_dict': model_trained.state_dict()}
 
-    torch.save(checkpoint,checkpoint_path+"_"+arch)
-
+    torch.save(checkpoint,checkpoint_file)
+    
+    print(f"Checkpoint Saved: {checkpoint_file}")
