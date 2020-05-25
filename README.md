@@ -4,6 +4,11 @@ Project code for Udacity's AI Programming with Python Nanodegree program. In thi
 
 Checkpoints are stored in a folder. For example, I use this one as a default: : ./checkpoints
 
+# Note:
+
+Please use a CUDA environment.
+
+
 # Note: 
 
 for train, we specify only the folder to persist the checkpoints. For eg: ./checkpoints
