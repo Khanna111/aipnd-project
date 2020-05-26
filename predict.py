@@ -106,7 +106,7 @@ if __name__== "__main__":
     print(indices.shape)
     topk = topk.view(-1)
     
-    with open('cat_to_name.json', 'r') as f:
+    with open(category_names, 'r') as f:
         cat_to_name = json.load(f)
 
     print("Total keys: {}".format(len(cat_to_name)))
