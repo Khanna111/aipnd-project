@@ -2,7 +2,9 @@
 
 Project code for Udacity's AI Programming with Python Nanodegree program. In this project, students first develop code for an image classifier built with PyTorch, then convert it into a command line application.
 
-Checkpoints are stored in a folder. For example, I use this one as a default: : ./checkpoints
+# Note:
+
+Please do specify a folder to persist the checkpoints. Checkpoints are stored in a folder. For example, I use this one as a default: : ./checkpoints
 
 # Note:
 
